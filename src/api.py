@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
+import pandas as pd
 from src.utils import load_model
 from pathlib import Path
 import glob
@@ -71,12 +72,18 @@ def predict_endpoint(inp: Input):
     result = {}
     if prob is None:
         # fallback: return predicted label and unknown confidence
+        # try numpy array first, then try pandas DataFrame (some pipelines expect DataFrame)
         try:
             pred = MODEL.predict(arr)[0]
             result["prediction"] = int(pred)
             result["confidence"] = None
         except Exception:
-            result["error"] = "model does not provide prediction/probability interface"
+            try:
+                pred = MODEL.predict(pd.DataFrame(arr))[0]
+                result["prediction"] = int(pred)
+                result["confidence"] = None
+            except Exception:
+                result["error"] = "model does not provide prediction/probability interface"
     else:
         result["prediction"] = int(prob >= 0.5)
         result["confidence"] = float(prob)
