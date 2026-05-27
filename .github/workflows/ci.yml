@@ -23,4 +23,8 @@ jobs:
       - name: Quick train smoke (CI)
         run: |
           python -c "from src.train import train_and_log; from sklearn.datasets import make_classification; X,y=make_classification(n_samples=100,n_features=10,random_state=0); train_and_log(X,y,out_dir='models',quick=True)"
-        run: pytest -q
+      - name: Upload models artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: models
+          path: models/

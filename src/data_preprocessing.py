@@ -6,6 +6,16 @@ from sklearn.model_selection import train_test_split
 from joblib import dump
 
 from .preprocessing_pipeline import build_preprocessing
+from joblib import dump
+
+# optional MLflow logging
+try:
+    import mlflow
+    import mlflow.sklearn
+    MLFLOW_ENABLED = True
+except Exception:
+    mlflow = None
+    MLFLOW_ENABLED = False
 
 
 def load_csv(path: str) -> pd.DataFrame:
@@ -26,6 +36,33 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
 
     # drop exact duplicate rows
     df = df.drop_duplicates()
+    return df
+
+
+def preprocess(df: pd.DataFrame) -> pd.DataFrame:
+    """Compatibility wrapper used by tests: perform basic cleaning and fill missing values.
+
+    This applies `clean_df` then fills numeric NaNs with column median and
+    categorical NaNs with the most frequent value, returning a DataFrame
+    with no missing values when possible.
+    """
+    df = clean_df(df)
+
+    # fill numeric cols with median
+    for col in df.select_dtypes(include=["number"]).columns:
+        if df[col].isnull().any():
+            median = df[col].median()
+            df[col] = df[col].fillna(median)
+
+    # fill object/category cols with mode
+    for col in df.select_dtypes(include=["object", "category"]).columns:
+        if df[col].isnull().any():
+            try:
+                mode = df[col].mode().iloc[0]
+                df[col] = df[col].fillna(mode)
+            except Exception:
+                df[col] = df[col].fillna(0)
+
     return df
 
 
@@ -71,6 +108,26 @@ def preprocess_and_split(
 
     preproc = build_preprocessing(X_raw)
     X_transformed = preproc.fit_transform(X_raw)
+
+    # persist fitted preprocessing pipeline for reproducibility
+    model_dir = os.path.join(out_dir, "..", "models")
+    os.makedirs(model_dir, exist_ok=True)
+    preproc_path = os.path.join(model_dir, "preprocessor.joblib")
+    try:
+        dump(preproc, preproc_path)
+    except Exception:
+        pass
+
+    # optionally log the preprocessor to MLflow (if tracking available)
+    if MLFLOW_ENABLED:
+        try:
+            if mlflow.active_run() is None:
+                with mlflow.start_run(run_name="preprocessor_save"):
+                    mlflow.sklearn.log_model(preproc, "preprocessor")
+            else:
+                mlflow.sklearn.log_model(preproc, "preprocessor")
+        except Exception:
+            pass
 
     # build feature names: numeric + one-hot
     num_cols = X_raw.select_dtypes(include=["number"]).columns.tolist()

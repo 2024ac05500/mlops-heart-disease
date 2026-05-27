@@ -7,6 +7,9 @@ from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from joblib import dump
+from joblib import dump as _dump
+from joblib import load as _load
+from pathlib import Path
 
 
 # optional MLflow; fall back to no-op logger if not installed
@@ -188,6 +191,26 @@ def train_from_csv(train_csv_path: str = "data/processed/train.csv", out_dir: st
     y = df["target"].values
     X = df.drop(columns=["target"]).values
     return train_and_log(X, y, out_dir=out_dir, quick=quick, tuning_method=tuning_method, param_grids=param_grids, n_iter=n_iter, cv=cv)
+
+
+def train_model(X, y, out_path: str = "models/model.joblib"):
+    """Compatibility wrapper for tests: train quickly and save model to `out_path`.
+
+    Returns the trained model.
+    """
+    out_p = Path(out_path)
+    out_p.parent.mkdir(parents=True, exist_ok=True)
+
+    # use quick training to keep CI fast
+    _, model = train_and_log(X, y, out_dir=str(out_p.parent), quick=True)
+
+    try:
+        # save specifically to requested path
+        _dump(model, str(out_p))
+    except Exception:
+        pass
+
+    return model
 
 
 if __name__ == "__main__":
