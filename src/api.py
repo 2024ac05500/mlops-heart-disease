@@ -122,22 +122,22 @@ def predict_endpoint(inp: Input):
     if prob is None:
         # fallback: return predicted label and unknown confidence
         # try numpy array first, then try pandas DataFrame (some pipelines expect DataFrame)
-            try:
-                pred = MODEL.predict(X)[0]
+        try:
+            pred = MODEL.predict(X)[0]
             result["prediction"] = int(pred)
             result["confidence"] = None
         except Exception:
-                try:
-                    import pandas as pd
+            try:
+                import pandas as pd
 
-                    if df is not None:
-                        pred = MODEL.predict(df)[0]
-                        result["prediction"] = int(pred)
-                        result["confidence"] = None
-                    else:
-                        result["error"] = "model does not provide prediction/probability interface"
-                except Exception:
+                if df is not None:
+                    pred = MODEL.predict(df)[0]
+                    result["prediction"] = int(pred)
+                    result["confidence"] = None
+                else:
                     result["error"] = "model does not provide prediction/probability interface"
+            except Exception:
+                result["error"] = "model does not provide prediction/probability interface"
     else:
         result["prediction"] = int(prob >= 0.5)
         result["confidence"] = float(prob)
