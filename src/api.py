@@ -51,9 +51,16 @@ def predict_endpoint(inp: Input):
     if MODEL is None:
         return {"error": "model not available"}
     arr = np.array(inp.features).reshape(1, -1)
-    # try predict_proba, fall back to decision_function
+    # try predict_proba, fall back to decision_function; otherwise return prediction with null confidence
+    prob = None
     try:
-        prob = MODEL.predict_proba(arr)[0, 1]
+        proba = MODEL.predict_proba(arr)
+        # if binary classifier, take column for positive class
+        if proba.shape[1] == 2:
+            prob = float(proba[0, 1])
+        else:
+            # multiclass: take max class probability
+            prob = float(proba[0].max())
     except Exception:
         try:
             p = MODEL.decision_function(arr)
@@ -63,8 +70,14 @@ def predict_endpoint(inp: Input):
 
     result = {}
     if prob is None:
-        result["error"] = "model does not provide probability or decision function"
+        # fallback: return predicted label and unknown confidence
+        try:
+            pred = MODEL.predict(arr)[0]
+            result["prediction"] = int(pred)
+            result["confidence"] = None
+        except Exception:
+            result["error"] = "model does not provide prediction/probability interface"
     else:
-        result["probability"] = float(prob)
         result["prediction"] = int(prob >= 0.5)
+        result["confidence"] = float(prob)
     return result
