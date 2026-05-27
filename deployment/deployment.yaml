@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlops-heart-disease
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlops-heart-disease
+  template:
+    metadata:
+      labels:
+        app: mlops-heart-disease
+    spec:
+      containers:
+        - name: app
+          image: mlops-heart-disease:latest
+          ports:
+            - containerPort: 8000

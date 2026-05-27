@@ -1,0 +1,26 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      - name: Lint (quiet)
+        run: |
+          python -m pip install flake8
+          flake8 --max-line-length=120 || true
+      - name: Run tests
+        run: pytest -q
+      - name: Quick train smoke (CI)
+        run: |
+          python -c "from src.train import train_and_log; from sklearn.datasets import make_classification; X,y=make_classification(n_samples=100,n_features=10,random_state=0); train_and_log(X,y,out_dir='models',quick=True)"
+        run: pytest -q
