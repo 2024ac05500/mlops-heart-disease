@@ -1,0 +1,27 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Git
+.git
+
+# Data and artifacts
+data/
+mlruns/
+models/
+environment.yml
+*.egg-info
+
+# Notebooks and caches
+*.ipynb
+__pycache__/
+*.pyc
+notebooks/
+screenshots/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Dockerfile builds
+.dockerignore
