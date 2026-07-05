@@ -1,12 +1,12 @@
 import sys
 from pathlib import Path
 
-# ensure repo root on path so `src` is importable
+# ensure repo root is on path so `src` can be importable
 repo_root = next((p for p in [Path.cwd()] + list(Path.cwd().parents) if (p / "src").exists()), Path.cwd())
 sys.path.insert(0, str(repo_root))
 
-from fastapi.testclient import TestClient
-from src.api import app
+from fastapi.testclient import TestClient  # noqa: E402
+from src.api import app  # noqa: E402
 
 # sample input features in expected RAW_FEATURE_COLUMNS order
 sample = {

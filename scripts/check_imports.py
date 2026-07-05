@@ -1,5 +1,5 @@
 import importlib
- import sys
+import sys
 from pathlib import Path
 
 # ensure repo root is on path (so `src` can be imported)
