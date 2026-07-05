@@ -21,10 +21,10 @@ jobs:
       - name: Set PYTHONPATH for tests
         run: |
           echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
-      - name: Lint (quiet)
+      - name: Lint
         run: |
           python -m pip install flake8
-          flake8 --max-line-length=120 || true
+          flake8 --max-line-length=120
       - name: Run tests
         run: pytest -q
       - name: Quick train smoke (CI)
