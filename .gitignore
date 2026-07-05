@@ -2,7 +2,4 @@ __pycache__/
 *.pyc
 .env
 venv/
-models/
-mlruns/
-__pycache__/
 .DS_Store
