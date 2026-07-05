@@ -72,11 +72,24 @@ uvicorn src.api:app --reload --port 8000
 - `scripts/generate_eval_plots.py` — creates evaluation plots and logs artifacts to MLflow when available.
 - `notebooks/` — EDA and evaluation notebooks (executed copies and screenshots included).
 
+## Monitoring
+
+- The FastAPI app now exposes Prometheus metrics at `/metrics`.
+- Prometheus scrape config is available at `monitoring/prometheus.yml`.
+- Grafana dashboard JSON is available at `monitoring/grafana/dashboard.json`.
+- Metrics tracked: request count, request latency, and error count.
+
 ## Reproducibility
 
 - A fitted preprocessor is saved at `models/preprocessor.joblib` during preprocessing.
 - A pinned environment is provided in `environment.yml` for reproducible CI and local environments.
 - MLflow tracking is integrated and run artifacts are in `mlruns/` when used.
+
+## Monitoring
+
+- The FastAPI app now exposes a Prometheus metrics endpoint at `/metrics`.
+- A Prometheus scrape config is available at `monitoring/prometheus.yml`.
+- A Grafana dashboard definition is available at `monitoring/grafana/dashboard.json` for visualizing request count, latency, and error rate.
 
 ## CI
 

@@ -1,10 +1,37 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import numpy as np
-from src.utils import load_model
-from joblib import load as joblib_load
+import logging
+import time
 from pathlib import Path
 import glob
+
+import numpy as np
+from fastapi import FastAPI, Request, Response
+from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel
+from prometheus_client import Counter, Histogram, CONTENT_TYPE_LATEST, generate_latest
+from src.utils import load_model
+from joblib import load as joblib_load
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s %(message)s",
+)
+logger = logging.getLogger("heart-disease-api")
+
+REQUEST_COUNT = Counter(
+    "heart_disease_api_requests_total",
+    "Total HTTP requests processed by the heart disease API",
+    ["method", "path", "status_code"],
+)
+REQUEST_LATENCY = Histogram(
+    "heart_disease_api_request_latency_seconds",
+    "Request latency in seconds for heart disease API",
+    ["method", "path"],
+)
+ERROR_COUNT = Counter(
+    "heart_disease_api_errors_total",
+    "Total number of HTTP error responses from the heart disease API",
+    ["method", "path", "status_code"],
+)
 
 app = FastAPI()
 
@@ -64,6 +91,33 @@ def _try_load_preprocessor():
     return None, None
 
 
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    start_time = time.time()
+    response = Response(status_code=500)
+    try:
+        response = await call_next(request)
+        return response
+    finally:
+        elapsed = time.time() - start_time
+        method = request.method
+        path = request.url.path
+        status_code = str(response.status_code)
+
+        REQUEST_LATENCY.labels(method=method, path=path).observe(elapsed)
+        REQUEST_COUNT.labels(method=method, path=path, status_code=status_code).inc()
+        if response.status_code >= 400:
+            ERROR_COUNT.labels(method=method, path=path, status_code=status_code).inc()
+
+        logger.info(
+            "%s %s %s %.4fs",
+            method,
+            path,
+            status_code,
+            elapsed,
+        )
+
+
 @app.on_event("startup")
 def startup_event():
     global MODEL
@@ -73,13 +127,22 @@ def startup_event():
     global PREPROCESSOR
     PREPROCESSOR = preproc
     if MODEL is not None:
-        print(f"Loaded model from {path}")
+        logger.info("Loaded model from %s", path)
     else:
-        print("No model found in models/; predict endpoint will return error until a model is placed.")
+        logger.warning(
+            "No model found in models/; predict endpoint will return error until a model is placed."
+        )
     if PREPROCESSOR is not None:
-        print(f"Loaded preprocessor from {ppath}")
+        logger.info("Loaded preprocessor from %s", ppath)
     else:
-        print("No preprocessor found in models/; incoming raw features must be pre-transformed to match model input.")
+        logger.warning(
+            "No preprocessor found in models/; incoming raw features must be pre-transformed to match model input."
+        )
+
+
+@app.get("/metrics")
+def metrics():
+    return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.post("/predict")

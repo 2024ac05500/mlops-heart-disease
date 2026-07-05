@@ -9,4 +9,5 @@ matplotlib
 seaborn
 pytest
 httpx2
+prometheus-client
 scipy
