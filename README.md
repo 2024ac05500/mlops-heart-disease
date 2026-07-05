@@ -63,6 +63,63 @@ python scripts/generate_eval_plots.py
 uvicorn src.api:app --reload --port 8000
 ```
 
+## Understanding the repository
+
+Follow this ordered walkthrough to understand how the code executes end to end.
+
+1. Data ingestion and cleaning
+   - `scripts/download_data.py`
+     - downloads the UCI Cleveland heart disease dataset into `data/raw/heart.csv`
+   - `src/data_preprocessing.py`
+     - loads the raw CSV
+     - cleans missing values and duplicate rows
+     - fills numeric and categorical missing values
+     - saves preprocessed datasets and the preprocessing artifact
+   - `src/preprocessing_pipeline.py`
+     - builds the scikit-learn preprocessing pipeline
+     - applies median imputation and scaling for numeric features
+     - applies one-hot encoding for categorical features
+
+2. Model training and selection
+   - `src/train.py`
+     - loads processed train data
+     - trains multiple candidate models
+     - optionally performs hyperparameter search (grid or random)
+     - evaluates performance using cross-validation
+     - saves model artifacts to `models/`
+     - logs metrics and artifacts to MLflow when available
+
+3. Model evaluation
+   - `scripts/generate_eval_plots.py`
+     - loads saved models and test data
+     - generates ROC, precision-recall, and confusion matrix plots
+     - saves evaluation artifacts to `screenshots/`
+     - optionally uploads artifacts to MLflow
+
+4. Service deployment
+   - `src/api.py`
+     - loads `models/best_model.joblib` and `models/preprocessor.joblib`
+     - exposes `POST /predict` for inference
+     - exposes `GET /metrics` for Prometheus monitoring
+     - records request count, latency, and error metrics
+   - `Dockerfile`
+     - packages the API into a Docker image
+   - `k8s/deployment.yaml` and `k8s/service.yaml`
+     - define deployment and service manifests for Kubernetes
+
+5. Monitoring and observability
+   - `monitoring/prometheus.yml`
+     - configures Prometheus to scrape `GET /metrics`
+   - `monitoring/grafana/dashboard.json`
+     - dashboard definition for request rate, latency, and error monitoring
+
+6. Continuous integration
+   - `.github/workflows/ci.yml`
+     - installs dependencies
+     - runs flake8 linting and pytest tests
+     - performs a quick smoke training run
+     - uploads the `models/` directory as a CI artifact
+
 ## Important files
 
 - `scripts/download_data.py` — downloads UCI Cleveland dataset to `data/raw/heart.csv`.
@@ -70,6 +127,11 @@ uvicorn src.api:app --reload --port 8000
 - `src/data_preprocessing.py` — cleaning, `preprocess_and_split()` saves processed CSVs and writes `models/preprocessor.joblib`.
 - `src/train.py` — training, supports `GridSearchCV`, `RandomizedSearchCV`, and optional Optuna; saves models to `models/` and logs to MLflow when available.
 - `scripts/generate_eval_plots.py` — creates evaluation plots and logs artifacts to MLflow when available.
+- `src/api.py` — FastAPI prediction and metrics service.
+- `Dockerfile` — container packaging for the API.
+- `k8s/deployment.yaml` / `k8s/service.yaml` — Kubernetes deployment and service manifests.
+- `monitoring/prometheus.yml` — Prometheus scrape config.
+- `monitoring/grafana/dashboard.json` — Grafana dashboard definition.
 - `notebooks/` — EDA and evaluation notebooks (executed copies and screenshots included).
 
 ## Monitoring
