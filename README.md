@@ -67,7 +67,14 @@ uvicorn src.api:app --reload --port 8000
 
 Follow this ordered walkthrough to understand how the code executes end to end.
 
-1. Data ingestion and cleaning
+1. Data Acquisition & Exploratory Data Analysis (EDA)
+   - `notebooks/eda.ipynb` and `notebooks/eda_executed.ipynb`
+     - analyze raw feature distributions and missing values
+     - visualize class balance between positive and negative heart disease cases
+     - create histograms, correlation heatmaps, and pairplots for selected features
+     - document preprocessing decisions based on observed feature relationships
+
+2. Data ingestion and cleaning
    - `scripts/download_data.py`
      - downloads the UCI Cleveland heart disease dataset into `data/raw/heart.csv`
    - `src/data_preprocessing.py`
@@ -80,7 +87,7 @@ Follow this ordered walkthrough to understand how the code executes end to end.
      - applies median imputation and scaling for numeric features
      - applies one-hot encoding for categorical features
 
-2. Model training and selection
+3. Model training and selection
    - `src/train.py`
      - loads processed train data
      - trains multiple candidate models
@@ -89,14 +96,14 @@ Follow this ordered walkthrough to understand how the code executes end to end.
      - saves model artifacts to `models/`
      - logs metrics and artifacts to MLflow when available
 
-3. Model evaluation
+4. Model evaluation
    - `scripts/generate_eval_plots.py`
      - loads saved models and test data
      - generates ROC, precision-recall, and confusion matrix plots
      - saves evaluation artifacts to `screenshots/`
      - optionally uploads artifacts to MLflow
 
-4. Service deployment
+5. Service deployment
    - `src/api.py`
      - loads `models/best_model.joblib` and `models/preprocessor.joblib`
      - exposes `POST /predict` for inference
@@ -107,13 +114,13 @@ Follow this ordered walkthrough to understand how the code executes end to end.
    - `k8s/deployment.yaml` and `k8s/service.yaml`
      - define deployment and service manifests for Kubernetes
 
-5. Monitoring and observability
+6. Monitoring and observability
    - `monitoring/prometheus.yml`
      - configures Prometheus to scrape `GET /metrics`
    - `monitoring/grafana/dashboard.json`
      - dashboard definition for request rate, latency, and error monitoring
 
-6. Continuous integration
+7. Continuous integration
    - `.github/workflows/ci.yml`
      - installs dependencies
      - runs flake8 linting and pytest tests
