@@ -1,11 +1,14 @@
 import os
+import tempfile
 from typing import Tuple
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
 from joblib import dump
 from joblib import dump as _dump
 from joblib import load as _load
@@ -23,9 +26,80 @@ except Exception:
 
 
 def evaluate_model(model, X, y) -> dict:
-    scores = {}
-    scores["accuracy"] = float(cross_val_score(model, X, y, cv=3).mean())
+    y_pred = cross_val_predict(model, X, y, cv=3)
+    scores = {
+        "accuracy": float(accuracy_score(y, y_pred)),
+        "precision": float(precision_score(y, y_pred, zero_division=0)),
+        "recall": float(recall_score(y, y_pred, zero_division=0)),
+        "f1": float(f1_score(y, y_pred, zero_division=0)),
+    }
+    try:
+        y_prob = cross_val_predict(model, X, y, cv=3, method="predict_proba")[:, 1]
+        scores["roc_auc"] = float(roc_auc_score(y, y_prob))
+    except Exception:
+        try:
+            y_prob = cross_val_predict(model, X, y, cv=3, method="decision_function")
+            if y_prob.ndim > 1:
+                y_prob = y_prob.ravel()
+            scores["roc_auc"] = float(roc_auc_score(y, y_prob))
+        except Exception:
+            scores["roc_auc"] = float("nan")
     return scores
+
+
+def _plot_and_log_artifacts(model, X, y, run, model_name, out_dir):
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        y_pred = model.predict(X)
+    except Exception:
+        return
+
+    # Confusion matrix
+    cm = confusion_matrix(y, y_pred)
+    plt.figure(figsize=(5, 4))
+    plt.imshow(cm, interpolation='nearest', cmap='Blues')
+    plt.title(f'Confusion Matrix: {model_name}')
+    plt.colorbar()
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            plt.text(j, i, cm[i, j], ha='center', va='center', color='black')
+    cm_path = out_dir / f'confusion_{model_name}.png'
+    plt.tight_layout()
+    plt.savefig(cm_path)
+    plt.close()
+    if MLFLOW_ENABLED and run is not None:
+        mlflow.log_artifact(str(cm_path), artifact_path='plots')
+
+    # ROC curve
+    try:
+        y_prob = model.predict_proba(X)[:, 1]
+    except Exception:
+        try:
+            y_prob = model.decision_function(X)
+            if y_prob.ndim > 1:
+                y_prob = y_prob.ravel()
+        except Exception:
+            y_prob = None
+
+    if y_prob is not None:
+        fpr, tpr, _ = roc_curve(y, y_prob)
+        plt.figure(figsize=(6, 5))
+        plt.plot(fpr, tpr, label=f'AUC={roc_auc_score(y, y_prob):.3f}')
+        plt.plot([0, 1], [0, 1], 'k--', alpha=0.3)
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title(f'ROC Curve: {model_name}')
+        plt.legend(loc='lower right')
+        roc_path = out_dir / f'roc_{model_name}.png'
+        plt.tight_layout()
+        plt.savefig(roc_path)
+        plt.close()
+        if MLFLOW_ENABLED and run is not None:
+            mlflow.log_artifact(str(roc_path), artifact_path='plots')
 
 
 def _get_models():
@@ -168,6 +242,10 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
             # save model artifact locally
             model_path = os.path.join(out_dir, f"model_{name}.joblib")
             dump(model, model_path)
+
+            # plot and log artifacts to MLflow
+            if MLFLOW_ENABLED and run is not None:
+                _plot_and_log_artifacts(model, X, y, run, name, out_dir=os.path.join(out_dir, 'plots'))
 
             if scores.get("accuracy", 0) > best_score:
                 best_score = scores["accuracy"]
