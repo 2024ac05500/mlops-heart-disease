@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 import glob
 import joblib
@@ -6,7 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import roc_curve, auc, precision_recall_curve, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.metrics import roc_curve, auc, precision_recall_curve, confusion_matrix
 
 
 # optional MLflow artifact logging

@@ -1,7 +1,6 @@
 import sys
 import json
 import io
-import types
 from contextlib import redirect_stdout, redirect_stderr
 
 

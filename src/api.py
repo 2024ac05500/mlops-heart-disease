@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
-import pandas as pd
 from src.utils import load_model
 from joblib import load as joblib_load
 from pathlib import Path

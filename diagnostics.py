@@ -9,7 +9,7 @@ print('HAS predict:', hasattr(M, 'predict'))
 print('HAS predict_proba:', hasattr(M, 'predict_proba'))
 print('HAS decision_function:', hasattr(M, 'decision_function'))
 
-arr = np.array([63,1,1,145,233,1,2,150,0,2.3,3,0,6]).reshape(1, -1)
+arr = np.array([63, 1, 1, 145, 233, 1, 2, 150, 0, 2.3, 3, 0, 6]).reshape(1, -1)
 try:
     print('PRED (np):', M.predict(arr))
 except Exception:

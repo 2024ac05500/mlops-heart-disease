@@ -1,5 +1,4 @@
 import os
-import tempfile
 from typing import Tuple
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,12 +6,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_val_predict, cross_val_score
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
 from joblib import dump
 from joblib import dump as _dump
-from joblib import load as _load
+# keep joblib.load available via direct import when needed
 from pathlib import Path
 
 
