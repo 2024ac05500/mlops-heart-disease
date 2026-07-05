@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from joblib import dump
 
 from .preprocessing_pipeline import build_preprocessing
-from joblib import dump
+# joblib.dump already imported above
 
 # optional MLflow logging
 try:

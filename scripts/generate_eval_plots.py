@@ -61,7 +61,7 @@ def main():
     sns.set(style='whitegrid')
 
     # ROC
-    plt.figure(figsize=(8,6))
+    plt.figure(figsize=(8, 6))
     any_plot = False
     for name, model in models.items():
         probs = get_probs(model, X)
@@ -72,7 +72,7 @@ def main():
         plt.plot(fpr, tpr, label=f'{name} (AUC={roc_auc_val:.3f})')
         any_plot = True
     if any_plot:
-        plt.plot([0,1],[0,1],'k--', alpha=0.3)
+        plt.plot([0, 1], [0, 1], 'k--', alpha=0.3)
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
         plt.title('ROC Curves')
@@ -82,7 +82,7 @@ def main():
         plt.close()
 
     # PR
-    plt.figure(figsize=(8,6))
+    plt.figure(figsize=(8, 6))
     any_plot = False
     for name, model in models.items():
         probs = get_probs(model, X)
@@ -105,7 +105,7 @@ def main():
     for name, model in models.items():
         y_pred = model.predict(X)
         cm = confusion_matrix(y, y_pred)
-        plt.figure(figsize=(4,3))
+        plt.figure(figsize=(4, 3))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
         plt.xlabel('Predicted')
         plt.ylabel('Actual')

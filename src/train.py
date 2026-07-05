@@ -8,7 +8,15 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_predict, cross_val_score
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    roc_curve,
+    confusion_matrix,
+)
 from joblib import dump
 from joblib import dump as _dump
 # keep joblib.load available via direct import when needed
@@ -112,7 +120,11 @@ def _get_models():
     try:
         import xgboost as xgb
 
-        models["xgb"] = xgb.XGBClassifier(use_label_encoder=False, eval_metric="logloss", random_state=0)
+        models["xgb"] = xgb.XGBClassifier(
+            use_label_encoder=False,
+            eval_metric="logloss",
+            random_state=0,
+        )
     except Exception:
         models["xgb"] = GradientBoostingClassifier(random_state=0)
 
@@ -127,9 +139,21 @@ def _get_models():
 
 def _default_param_grids():
     return {
-        "logreg": {"C": [0.01, 0.1, 1, 10], "penalty": ["l2"], "solver": ["lbfgs"]},
-        "rf": {"n_estimators": [50, 100, 200], "max_depth": [None, 5, 10], "min_samples_split": [2, 5]},
-        "xgb": {"n_estimators": [50, 100, 200], "max_depth": [3, 6, 9], "learning_rate": [0.01, 0.1, 0.2]},
+        "logreg": {
+            "C": [0.01, 0.1, 1, 10],
+            "penalty": ["l2"],
+            "solver": ["lbfgs"],
+        },
+        "rf": {
+            "n_estimators": [50, 100, 200],
+            "max_depth": [None, 5, 10],
+            "min_samples_split": [2, 5],
+        },
+        "xgb": {
+            "n_estimators": [50, 100, 200],
+            "max_depth": [3, 6, 9],
+            "learning_rate": [0.01, 0.1, 0.2],
+        },
         "svc": {"C": [0.1, 1, 10], "kernel": ["rbf", "linear"]},
     }
 
@@ -149,7 +173,15 @@ def tune_model(model, X, y, param_grid=None, method="grid", n_iter=20, cv=3, sco
         return search.best_estimator_, search.best_params_
 
     if method == "random":
-        search = RandomizedSearchCV(model, param_grid, n_iter=n_iter, cv=cv, scoring=scoring, random_state=random_state, n_jobs=-1)
+        search = RandomizedSearchCV(
+            model,
+            param_grid,
+            n_iter=n_iter,
+            cv=cv,
+            scoring=scoring,
+            random_state=random_state,
+            n_jobs=-1,
+        )
         search.fit(X, y)
         return search.best_estimator_, search.best_params_
 
@@ -185,7 +217,17 @@ def tune_model(model, X, y, param_grid=None, method="grid", n_iter=20, cv=3, sco
     return model, {}
 
 
-def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_method: str = None, param_grids: dict = None, n_iter: int = 20, cv: int = 3, preprocessor=None) -> Tuple[str, object, str]:
+def train_and_log(
+    X,
+    y,
+    out_dir: str = "models",
+    quick: bool = False,
+    tuning_method: str = None,
+    param_grids: dict = None,
+    n_iter: int = 20,
+    cv: int = 3,
+    preprocessor=None,
+) -> Tuple[str, object, str]:
     os.makedirs(out_dir, exist_ok=True)
     if quick:
         X = X[:50]
@@ -197,7 +239,6 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
         mlflow.set_experiment("heart_disease_experiment")
 
     best_score = -1.0
-    best_name = None
     best_model = None
     best_pipeline = None
 
@@ -218,7 +259,15 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
             tuned_params = None
             if tuning_method and grid:
                 try:
-                    best_est, best_params = tune_model(model, X, y, param_grid=grid, method=tuning_method, n_iter=n_iter, cv=cv)
+                    best_est, best_params = tune_model(
+                        model,
+                        X,
+                        y,
+                        param_grid=grid,
+                        method=tuning_method,
+                        n_iter=n_iter,
+                        cv=cv,
+                    )
                     model = best_est
                     tuned_params = best_params
                 except Exception as e:
@@ -260,11 +309,18 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
 
             # plot and log artifacts to MLflow
             if MLFLOW_ENABLED and run is not None:
-                _plot_and_log_artifacts(model, X, y, run, name, out_dir=os.path.join(out_dir, 'plots'))
+                _plot_and_log_artifacts(
+                    model,
+                    X,
+                    y,
+                    run,
+                    name,
+                    out_dir=os.path.join(out_dir, "plots"),
+                )
 
             if scores.get("accuracy", 0) > best_score:
                 best_score = scores["accuracy"]
-                best_name = name
+                # record best model object
                 best_model = model
         finally:
             if MLFLOW_ENABLED and run is not None:
@@ -279,7 +335,15 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
     return out_path, best_model, best_pipeline_path
 
 
-def train_from_csv(train_csv_path: str = "data/processed/train.csv", out_dir: str = "models", quick: bool = False, tuning_method: str = None, param_grids: dict = None, n_iter: int = 20, cv: int = 3):
+def train_from_csv(
+    train_csv_path: str = "data/processed/train.csv",
+    out_dir: str = "models",
+    quick: bool = False,
+    tuning_method: str = None,
+    param_grids: dict = None,
+    n_iter: int = 20,
+    cv: int = 3,
+):
     import pandas as pd
 
     df = pd.read_csv(train_csv_path)
@@ -320,7 +384,12 @@ def train_model(X, y, out_path: str = "models/model.joblib"):
     out_p.parent.mkdir(parents=True, exist_ok=True)
 
     # use quick training to keep CI fast
-    _, model, _ = train_and_log(X, y, out_dir=str(out_p.parent), quick=True)
+    _, model, _ = train_and_log(
+        X,
+        y,
+        out_dir=str(out_p.parent),
+        quick=True,
+    )
 
     try:
         # save specifically to requested path

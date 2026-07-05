@@ -1,14 +1,14 @@
-import pandas as pd
-import os
-import sys
 from pathlib import Path
+import sys
+import os
+import pandas as pd
 
 # ensure repo root is on path
 repo_root = next((p for p in [Path.cwd()] + list(Path.cwd().parents) if (p / "src").exists()), Path.cwd())
 sys.path.insert(0, str(repo_root))
 
-from src.train import _get_models
-from src.evaluation import evaluate_models
+from src.train import _get_models  # noqa: E402
+from src.evaluation import evaluate_models  # noqa: E402
 
 
 def run(train_csv: str = "data/processed/train.csv", out_path: str = "models/evaluation_results.csv"):
