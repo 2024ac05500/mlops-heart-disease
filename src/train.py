@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
@@ -185,7 +186,7 @@ def tune_model(model, X, y, param_grid=None, method="grid", n_iter=20, cv=3, sco
     return model, {}
 
 
-def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_method: str = None, param_grids: dict = None, n_iter: int = 20, cv: int = 3) -> Tuple[str, object]:
+def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_method: str = None, param_grids: dict = None, n_iter: int = 20, cv: int = 3, preprocessor=None) -> Tuple[str, object, str]:
     os.makedirs(out_dir, exist_ok=True)
     if quick:
         X = X[:50]
@@ -199,6 +200,7 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
     best_score = -1.0
     best_name = None
     best_model = None
+    best_pipeline = None
 
     for name, model in models.items():
         if MLFLOW_ENABLED:
@@ -243,6 +245,20 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
             model_path = os.path.join(out_dir, f"model_{name}.joblib")
             dump(model, model_path)
 
+            # save a wrapped pipeline for reproducible inference if preprocessing is available
+            pipeline_path = None
+            if preprocessor is not None:
+                pipeline = Pipeline([
+                    ("preprocessor", preprocessor),
+                    ("estimator", model),
+                ])
+                pipeline_path = os.path.join(out_dir, f"pipeline_{name}.joblib")
+                dump(pipeline, pipeline_path)
+                if MLFLOW_ENABLED and run is not None:
+                    mlflow.log_artifact(pipeline_path, artifact_path='pipelines')
+                if scores.get("accuracy", 0) > best_score:
+                    best_pipeline = pipeline
+
             # plot and log artifacts to MLflow
             if MLFLOW_ENABLED and run is not None:
                 _plot_and_log_artifacts(model, X, y, run, name, out_dir=os.path.join(out_dir, 'plots'))
@@ -257,7 +273,11 @@ def train_and_log(X, y, out_dir: str = "models", quick: bool = False, tuning_met
 
     out_path = os.path.join(out_dir, "best_model.joblib")
     dump(best_model, out_path)
-    return out_path, best_model
+    best_pipeline_path = None
+    if best_pipeline is not None:
+        best_pipeline_path = os.path.join(out_dir, "best_pipeline.joblib")
+        dump(best_pipeline, best_pipeline_path)
+    return out_path, best_model, best_pipeline_path
 
 
 def train_from_csv(train_csv_path: str = "data/processed/train.csv", out_dir: str = "models", quick: bool = False, tuning_method: str = None, param_grids: dict = None, n_iter: int = 20, cv: int = 3):
@@ -268,7 +288,28 @@ def train_from_csv(train_csv_path: str = "data/processed/train.csv", out_dir: st
         raise ValueError("train CSV must contain 'target' column")
     y = df["target"].values
     X = df.drop(columns=["target"]).values
-    return train_and_log(X, y, out_dir=out_dir, quick=quick, tuning_method=tuning_method, param_grids=param_grids, n_iter=n_iter, cv=cv)
+
+    preprocessor = None
+    preproc_path = os.path.join("models", "preprocessor.joblib")
+    if os.path.exists(preproc_path):
+        try:
+            from joblib import load
+
+            preprocessor = load(preproc_path)
+        except Exception:
+            preprocessor = None
+
+    return train_and_log(
+        X,
+        y,
+        out_dir=out_dir,
+        quick=quick,
+        tuning_method=tuning_method,
+        param_grids=param_grids,
+        n_iter=n_iter,
+        cv=cv,
+        preprocessor=preprocessor,
+    )
 
 
 def train_model(X, y, out_path: str = "models/model.joblib"):
@@ -280,7 +321,7 @@ def train_model(X, y, out_path: str = "models/model.joblib"):
     out_p.parent.mkdir(parents=True, exist_ok=True)
 
     # use quick training to keep CI fast
-    _, model = train_and_log(X, y, out_dir=str(out_p.parent), quick=True)
+    _, model, _ = train_and_log(X, y, out_dir=str(out_p.parent), quick=True)
 
     try:
         # save specifically to requested path
