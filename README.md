@@ -88,6 +88,55 @@ Expected response:
 
 This is the same sample input used during local API verification for the project, and it confirms that the deployed model endpoint responds correctly for inference requests.
 
+## Architecture Diagram
+
+```mermaid
+flowchart LR
+  A[Download dataset] --> B[Preprocess and split]
+  B --> C[Train and tune models]
+  C --> D[Log runs in MLflow]
+  C --> E[Save artifacts in models/]
+  E --> F[Serve with FastAPI]
+  F --> G[Expose /metrics]
+  G --> H[Prometheus scrape]
+  H --> I[Grafana dashboards]
+  F --> J[Docker image]
+  J --> K[Kubernetes deployment]
+  C --> L[CI smoke checks]
+```
+
+## Evidence Screenshots
+
+MLflow and Prometheus evidence captured from local runtime:
+
+![MLflow Experiments UI](screenshots/workflows/mlflow-experiments.png)
+
+![Prometheus Metrics Endpoint](screenshots/workflows/prometheus-metrics.png)
+
+Kubernetes and CI evidence screenshot placeholders for submission packaging:
+
+- `screenshots/workflows/k8s-deployment-status.png`
+- `screenshots/workflows/deployed-api-metrics-endpoint.png`
+- `screenshots/workflows/deployed-api-predict-endpoint.png`
+- `screenshots/workflows/ci-run-summary.png`
+
+## Proof And Evidence Summary
+
+1. Claim: API is containerized and runnable locally.
+   Evidence: Docker build and run commands in this README under Docker build/run verification.
+
+2. Claim: `/predict` accepts JSON input and returns prediction plus confidence.
+   Evidence: Sample request and response shown in this README (`{"prediction": 0, "confidence": 0.42300383253750073}`).
+
+3. Claim: Experiment tracking is active with MLflow.
+   Evidence: Local UI command and URL, plus screenshot `screenshots/workflows/mlflow-experiments.png`.
+
+4. Claim: Runtime monitoring is enabled via Prometheus/Grafana.
+   Evidence: `/metrics` endpoint, Prometheus/Grafana config files, and screenshot `screenshots/workflows/prometheus-metrics.png`.
+
+5. Claim: Kubernetes deployment path is documented.
+   Evidence: `k8s/deployment.yaml`, `k8s/service.yaml`, and deployment commands in this README.
+
 ## Understanding the repository
 
 Follow this ordered walkthrough to understand how the code executes end to end.
@@ -191,6 +240,10 @@ Follow this ordered walkthrough to understand how the code executes end to end.
 ## CI
 
 - GitHub Actions workflow is in `.github/workflows/ci.yml`: installs deps, runs lint, executes tests, and uploads `models/` as an artifact.
+
+## Repository Link
+
+- https://github.com/2024ac05500/mlops-heart-disease
 
 ## License
 
