@@ -166,24 +166,27 @@ Follow this ordered walkthrough to understand how the code executes end to end.
 - `monitoring/grafana/dashboard.json` — Grafana dashboard definition.
 - `notebooks/` — EDA and evaluation notebooks (executed copies and screenshots included).
 
+## MLflow
+
+- Training and preprocessing runs are logged locally under `mlruns/` when MLflow is installed.
+- Start the local MLflow UI with `.venv\Scripts\python.exe -m mlflow ui --host 127.0.0.1 --port 5000`.
+- Open `http://127.0.0.1:5000` to inspect experiments, runs, metrics, and artifacts.
+- A verified local training run created entries under `mlruns/1/` using `src.train.train_from_csv(...)`.
+
 ## Monitoring
 
 - The FastAPI app now exposes Prometheus metrics at `/metrics`.
 - Prometheus scrape config is available at `monitoring/prometheus.yml`.
 - Grafana dashboard JSON is available at `monitoring/grafana/dashboard.json`.
 - Metrics tracked: request count, request latency, and error count.
+- Verified locally: a live `POST /predict` request returned `200`, and `GET /metrics` exposed `heart_disease_api_requests_total`, `heart_disease_api_request_latency_seconds_bucket`, and `heart_disease_api_errors_total`.
+- The Prometheus config is set to scrape `/metrics` for the `heart-disease-api` job, and the Grafana dashboard defines panels for request rate, p95 latency, error rate, and request rate by path.
 
 ## Reproducibility
 
 - A fitted preprocessor is saved at `models/preprocessor.joblib` during preprocessing.
 - A pinned environment is provided in `environment.yml` for reproducible CI and local environments.
 - MLflow tracking is integrated and run artifacts are in `mlruns/` when used.
-
-## Monitoring
-
-- The FastAPI app now exposes a Prometheus metrics endpoint at `/metrics`.
-- A Prometheus scrape config is available at `monitoring/prometheus.yml`.
-- A Grafana dashboard definition is available at `monitoring/grafana/dashboard.json` for visualizing request count, latency, and error rate.
 
 ## CI
 
