@@ -284,6 +284,7 @@ Expected verification evidence:
 
 - `/metrics` responds with Prometheus series such as `heart_disease_api_requests_total`.
 - `/predict` responds with a JSON prediction payload.
+- Example `/predict` response: `{ "prediction": 0, "confidence": 0.42300383253750073 }`.
 
 ## 8. CI/CD and Quality Validation
 
