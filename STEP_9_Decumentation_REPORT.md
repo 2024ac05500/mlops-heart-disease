@@ -307,6 +307,7 @@ This pipeline validates both code style and core training functionality.
 
 - `pytest` is used for functional and unit tests
 - `flake8` enforces style constraints and catches syntax issues
+- Unit-test proof: `tests/test_preprocessing.py` covers data preprocessing behavior and `tests/test_model.py` covers model training/prediction behavior.
 
 ### 8.3 CI/CD and deployment workflow screenshots
 
