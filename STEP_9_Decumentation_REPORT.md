@@ -199,6 +199,21 @@ The middleware records request latency, request volume, and error count for all 
   - error rate
   - request rate by path
 
+Minimal Grafana run command (auto-load provisioning on startup):
+
+```bash
+docker run --rm -p 3000:3000 --name grafana \
+  -v "${PWD}/monitoring/grafana/provisioning:/etc/grafana/provisioning" \
+  -v "${PWD}/monitoring/grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json" \
+  grafana/grafana:latest
+```
+
+This mount setup auto-loads:
+
+- Prometheus datasource from `monitoring/grafana/provisioning/datasources/prometheus.yml`
+- dashboard provider from `monitoring/grafana/provisioning/dashboards/dashboard.yml`
+- dashboard JSON from `monitoring/grafana/dashboard.json`
+
 ### 6.4 Verified local monitoring evidence
 
 - the API was started locally with Uvicorn and exposed `http://127.0.0.1:8000/metrics`
@@ -212,6 +227,44 @@ The middleware records request latency, request volume, and error count for all 
 Prometheus metrics endpoint screenshot:
 
 ![Prometheus Metrics Endpoint](screenshots/workflows/prometheus-metrics.png)
+
+### 6.5 Executed Grafana run command and dashboard proof
+
+Executed command:
+
+```bash
+docker run -d -p 3000:3000 --name grafana \
+  -v "${PWD}/monitoring/grafana/provisioning:/etc/grafana/provisioning" \
+  -v "${PWD}/monitoring/grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json" \
+  grafana/grafana:latest
+```
+
+Runtime proof captured:
+
+- container status: `grafana   Up About a minute   0.0.0.0:3000->3000/tcp`
+- health endpoint: `GET http://127.0.0.1:3000/api/health` returned:
+
+```json
+{
+  "database": "ok",
+  "version": "13.1.0",
+  "commit": "b309c9bb3b81a748c3a75289236a27309ed2566a"
+}
+```
+
+- Grafana datasource API returned provisioned Prometheus datasource (uid `prometheus`, url `http://host.docker.internal:9090`, `isDefault: true`)
+- Grafana dashboard search API returned loaded dashboard:
+  - `uid: heart-disease-api-monitoring`
+  - `title: Heart Disease API Monitoring`
+  - `url: /d/heart-disease-api-monitoring/heart-disease-api-monitoring`
+- Grafana startup logs include provisioning events:
+  - `inserting datasource from configuration name=Prometheus uid=prometheus`
+  - `starting to provision dashboards`
+  - `finished to provision dashboards`
+
+Latest Grafana dashboard screenshot (live metrics):
+
+![Grafana Dashboard](screenshots/workflows/grafana-dashboard.png)
 
 ## 7. Containerization and Kubernetes Deployment
 

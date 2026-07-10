@@ -107,11 +107,13 @@ flowchart LR
 
 ## Evidence Screenshots
 
-MLflow and Prometheus evidence captured from local runtime:
+MLflow, Prometheus, and Grafana evidence captured from local runtime (latest screenshot set):
 
 ![MLflow Experiments UI](screenshots/workflows/mlflow-experiments.png)
 
 ![Prometheus Metrics Endpoint](screenshots/workflows/prometheus-metrics.png)
+
+![Grafana Dashboard](screenshots/workflows/grafana-dashboard.png)
 
 Kubernetes and CI evidence screenshot placeholders for submission packaging:
 
@@ -132,7 +134,7 @@ Kubernetes and CI evidence screenshot placeholders for submission packaging:
    Evidence: Local UI command and URL, plus screenshot `screenshots/workflows/mlflow-experiments.png`.
 
 4. Claim: Runtime monitoring is enabled via Prometheus/Grafana.
-   Evidence: `/metrics` endpoint, Prometheus/Grafana config files, and screenshot `screenshots/workflows/prometheus-metrics.png`.
+   Evidence: `/metrics` endpoint, Prometheus/Grafana config files, and screenshots `screenshots/workflows/prometheus-metrics.png` and `screenshots/workflows/grafana-dashboard.png`.
 
 5. Claim: Kubernetes deployment path is documented.
    Evidence: `k8s/deployment.yaml`, `k8s/service.yaml`, and deployment commands in this README.
@@ -227,6 +229,17 @@ Follow this ordered walkthrough to understand how the code executes end to end.
 - The FastAPI app now exposes Prometheus metrics at `/metrics`.
 - Prometheus scrape config is available at `monitoring/prometheus.yml`.
 - Grafana dashboard JSON is available at `monitoring/grafana/dashboard.json`.
+- Run Grafana with provisioning auto-load (datasource + dashboard):
+
+```bash
+docker run --rm -p 3000:3000 --name grafana \
+  -v "${PWD}/monitoring/grafana/provisioning:/etc/grafana/provisioning" \
+  -v "${PWD}/monitoring/grafana/dashboard.json:/var/lib/grafana/dashboards/dashboard.json" \
+  grafana/grafana:latest
+```
+
+After startup, open `http://127.0.0.1:3000` and the Prometheus datasource plus dashboard load automatically.
+
 - Metrics tracked: request count, request latency, and error count.
 - Verified locally: a live `POST /predict` request returned `200`, and `GET /metrics` exposed `heart_disease_api_requests_total`, `heart_disease_api_request_latency_seconds_bucket`, and `heart_disease_api_errors_total`.
 - The Prometheus config is set to scrape `/metrics` for the `heart-disease-api` job, and the Grafana dashboard defines panels for request rate, p95 latency, error rate, and request rate by path.
