@@ -1,0 +1,13 @@
+{
+  "model": "xgb",
+  "scores": {
+    "accuracy": 0.9,
+    "precision": 0.9473684210526315,
+    "recall": 0.8181818181818182,
+    "f1": 0.8780487804878049,
+    "roc_auc": 0.8701298701298702
+  },
+  "tuned_params": {},
+  "model_artifact": "models\\model_xgb.joblib",
+  "pipeline_artifact": "models\\pipeline_xgb.joblib"
+}

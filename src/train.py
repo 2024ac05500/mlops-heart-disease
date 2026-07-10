@@ -1,4 +1,5 @@
 import os
+import json
 from typing import Tuple
 import numpy as np
 import matplotlib.pyplot as plt
@@ -108,6 +109,36 @@ def _plot_and_log_artifacts(model, X, y, run, model_name, out_dir):
         plt.close()
         if MLFLOW_ENABLED and run is not None:
             mlflow.log_artifact(str(roc_path), artifact_path='plots')
+
+
+def _log_run_params(name, quick, tuning_method, n_iter, cv, X, y):
+    """Log core run parameters for reproducibility and comparison."""
+    params = {
+        "model_name": name,
+        "quick_mode": bool(quick),
+        "tuning_method": tuning_method or "none",
+        "n_iter": int(n_iter),
+        "cv": int(cv),
+        "n_samples": int(len(y)),
+        "n_features": int(X.shape[1]) if hasattr(X, "shape") and len(X.shape) > 1 else 1,
+    }
+    mlflow.log_params(params)
+
+
+def _log_estimator_params(model):
+    """Log simple estimator params while skipping non-serializable values."""
+    try:
+        base_params = model.get_params(deep=False)
+    except Exception:
+        return
+
+    serializable = {}
+    for k, v in base_params.items():
+        if isinstance(v, (str, int, float, bool)) or v is None:
+            serializable[f"est_{k}"] = v
+
+    if serializable:
+        mlflow.log_params(serializable)
 
 
 def _get_models():
@@ -245,6 +276,8 @@ def train_and_log(
     for name, model in models.items():
         if MLFLOW_ENABLED:
             run = mlflow.start_run(run_name=name)
+            _log_run_params(name, quick, tuning_method, n_iter, cv, X, y)
+            _log_estimator_params(model)
         else:
             run = None
 
@@ -292,6 +325,8 @@ def train_and_log(
             # save model artifact locally
             model_path = os.path.join(out_dir, f"model_{name}.joblib")
             dump(model, model_path)
+            if MLFLOW_ENABLED and run is not None:
+                mlflow.log_artifact(model_path, artifact_path="models")
 
             # save a wrapped pipeline for reproducible inference if preprocessing is available
             pipeline_path = None
@@ -306,6 +341,22 @@ def train_and_log(
                     mlflow.log_artifact(pipeline_path, artifact_path='pipelines')
                 if scores.get("accuracy", 0) > best_score:
                     best_pipeline = pipeline
+
+            if MLFLOW_ENABLED and run is not None:
+                summary_path = os.path.join(out_dir, f"run_summary_{name}.json")
+                with open(summary_path, "w", encoding="utf-8") as f:
+                    json.dump(
+                        {
+                            "model": name,
+                            "scores": scores,
+                            "tuned_params": tuned_params or {},
+                            "model_artifact": model_path,
+                            "pipeline_artifact": pipeline_path,
+                        },
+                        f,
+                        indent=2,
+                    )
+                mlflow.log_artifact(summary_path, artifact_path="summaries")
 
             # plot and log artifacts to MLflow
             if MLFLOW_ENABLED and run is not None:
