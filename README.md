@@ -63,6 +63,31 @@ python scripts/generate_eval_plots.py
 uvicorn src.api:app --reload --port 8000
 ```
 
+## Docker build/run verification
+
+The repository includes a container image definition in `Dockerfile`. For local production-readiness verification, use the following commands to build the image, run it, and test the prediction endpoint with a sample payload:
+
+```bash
+docker build -t mlops-heart-disease:local .
+docker run --rm -p 8000:8000 --name heart-api mlops-heart-disease:local
+```
+
+In a second terminal, send a sample request:
+
+```bash
+curl -X POST http://127.0.0.1:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"features":[63,1,1,145,233,1,2,150,0,2.3,3,0,6]}'
+```
+
+Expected response:
+
+```json
+{ "prediction": 0, "confidence": 0.42300383253750073 }
+```
+
+This is the same sample input used during local API verification for the project, and it confirms that the deployed model endpoint responds correctly for inference requests.
+
 ## Understanding the repository
 
 Follow this ordered walkthrough to understand how the code executes end to end.
