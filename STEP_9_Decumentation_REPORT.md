@@ -132,7 +132,7 @@ The pipeline supports both grid search and randomized search.
 - models are evaluated with cross-validation
 - metrics logged include accuracy, precision, recall, F1 score, and ROC AUC when available
 - model artifacts are saved as `models/model_<name>.joblib` and `models/best_model.joblib`
-- when MLflow is available, runs are logged locally under `mlruns/` and can be viewed with `python -m mlflow ui --host 127.0.0.1 --port 5000`
+- when MLflow is available, runs are logged locally under `mlruns/` and can be viewed with `python -m mlflow ui --host 127.0.0.1 --port 5001`
 
 ### 5.3 Evaluation artifacts
 
@@ -155,10 +155,10 @@ These plots show model discrimination and classification performance across cand
 - Local UI command:
 
 ```bash
-.venv\Scripts\python.exe -m mlflow ui --host 127.0.0.1 --port 5000
+.venv\Scripts\python.exe -m mlflow ui --host 127.0.0.1 --port 5001
 ```
 
-- Local UI URL: `http://127.0.0.1:5000`
+- Local UI URL: `http://127.0.0.1:5001`
 
 MLflow UI screenshot (Experiments view):
 
@@ -224,9 +224,9 @@ This mount setup auto-loads:
   - `heart_disease_api_errors_total`
 - the Grafana dashboard file contains PromQL panels for request rate, p95 latency, error rate, and request rate by path against those exported metrics
 
-Prometheus metrics endpoint screenshot:
+Latest Prometheus metrics endpoint screenshot:
 
-![Prometheus Metrics Endpoint](screenshots/workflows/prometheus-metrics.png)
+![Prometheus Metrics Endpoint (Latest)](screenshots/workflows/prometheus-metrics.png)
 
 ### 6.5 Executed Grafana run command and dashboard proof
 
@@ -428,10 +428,10 @@ python -c "from src.train import train_from_csv; train_from_csv('data/processed/
 ### 10.4 MLflow UI
 
 ```bash
-.venv\Scripts\python.exe -m mlflow ui --host 127.0.0.1 --port 5000
+.venv\Scripts\python.exe -m mlflow ui --host 127.0.0.1 --port 5001
 ```
 
-Open `http://127.0.0.1:5000` to inspect locally logged runs in `mlruns/`.
+Open `http://127.0.0.1:5001` to inspect locally logged runs in `mlruns/`.
 
 ### 10.5 Run API
 

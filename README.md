@@ -111,7 +111,7 @@ MLflow, Prometheus, and Grafana evidence captured from local runtime (latest scr
 
 ![MLflow Experiments UI](screenshots/workflows/mlflow-experiments.png)
 
-![Prometheus Metrics Endpoint](screenshots/workflows/prometheus-metrics.png)
+![Prometheus Metrics Endpoint (Latest)](screenshots/workflows/prometheus-metrics.png)
 
 ![Grafana Dashboard](screenshots/workflows/grafana-dashboard.png)
 
@@ -220,8 +220,8 @@ Follow this ordered walkthrough to understand how the code executes end to end.
 ## MLflow
 
 - Training and preprocessing runs are logged locally under `mlruns/` when MLflow is installed.
-- Start the local MLflow UI with `.venv\Scripts\python.exe -m mlflow ui --host 127.0.0.1 --port 5000`.
-- Open `http://127.0.0.1:5000` to inspect experiments, runs, metrics, and artifacts.
+- Start the local MLflow UI with `.venv\Scripts\python.exe -m mlflow ui --host 127.0.0.1 --port 5001`.
+- Open `http://127.0.0.1:5001` to inspect experiments, runs, metrics, and artifacts.
 - A verified local training run created entries under `mlruns/1/` using `src.train.train_from_csv(...)`.
 
 ## Monitoring
