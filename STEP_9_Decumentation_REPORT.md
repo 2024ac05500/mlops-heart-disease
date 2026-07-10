@@ -244,6 +244,13 @@ kubectl apply -f k8s/service.yaml
 
 The service exposes the app on port 80 and routes traffic to container port 8000.
 
+Deployment mode used in this project:
+
+- local Kubernetes deployment (Minikube/Docker Desktop) is documented and supported.
+- manifest-based deployment is used (`k8s/deployment.yaml`, `k8s/service.yaml`), which satisfies the deployment-manifest requirement.
+- service exposure is configured via `LoadBalancer` in `k8s/service.yaml`.
+- optional Ingress manifest is available in `deployment/ingress.yaml` when ingress-based exposure is preferred.
+
 ### 7.3 Local K8s notes
 
 For Windows local Kubernetes, using Minikube with the Docker Desktop driver is recommended. The `imagePullPolicy: IfNotPresent` allows a locally built image to be used after loading it into Minikube.
@@ -255,6 +262,28 @@ minikube image load heart-disease-api:latest
 ```
 
 This avoids `ErrImagePull` for locally built images.
+
+### 7.4 Endpoint verification after deployment
+
+Use these checks after deploying to Kubernetes:
+
+```bash
+kubectl get pods
+kubectl get svc heart-disease-api
+kubectl get ingress
+```
+
+API endpoint verification examples:
+
+```bash
+curl http://127.0.0.1:8000/metrics
+curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -d '{"features":[63,1,1,145,233,1,2,150,0,2.3,3,0,6]}'
+```
+
+Expected verification evidence:
+
+- `/metrics` responds with Prometheus series such as `heart_disease_api_requests_total`.
+- `/predict` responds with a JSON prediction payload.
 
 ## 8. CI/CD and Quality Validation
 
@@ -286,6 +315,12 @@ This pipeline validates both code style and core training functionality.
   - `screenshots/workflows/ci-run-summary.png`
   - `screenshots/workflows/docker-build-success.png`
   - `screenshots/workflows/k8s-deployment-status.png`
+
+Recommended deployment evidence screenshots for submission:
+
+- `screenshots/workflows/k8s-deployment-status.png` (pods/deployment running)
+- `screenshots/workflows/deployed-api-metrics-endpoint.png` (opened deployed `/metrics` endpoint)
+- `screenshots/workflows/deployed-api-predict-endpoint.png` (successful deployed `/predict` response)
 
 ## 9. Reproducibility and Environment
 
