@@ -269,6 +269,14 @@ After startup, open `http://127.0.0.1:3000` and the Prometheus datasource plus d
   - measured total coverage: `79%`
   - status against CI gate: `PASS` (79% >= 70%)
 
+CI run screenshots (source run URL):
+
+- `https://github.com/2024ac05500/mlops-heart-disease/actions/runs/29149667608/job/86537018128`
+
+![CI Run Summary](screenshots/workflows/ci-run-summary.png)
+
+![CI Step Execution Including MLflow DB Logging/Upload](screenshots/workflows/ci-run-steps-mlflow.png)
+
 ## Repository Link
 
 - https://github.com/2024ac05500/mlops-heart-disease

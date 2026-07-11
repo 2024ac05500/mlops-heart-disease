@@ -406,6 +406,18 @@ Module-level coverage snapshot from the run:
   - `screenshots/workflows/docker-build-success.png`
   - `screenshots/workflows/k8s-deployment-status.png`
 
+Captured CI proof from:
+
+- `https://github.com/2024ac05500/mlops-heart-disease/actions/runs/29149667608/job/86537018128`
+
+CI run summary screenshot:
+
+![CI Run Summary](screenshots/workflows/ci-run-summary.png)
+
+CI step execution screenshot (includes lint, coverage, MLflow DB logging, MLflow DB validation, MLflow DB artifact upload, model artifact upload):
+
+![CI Step Execution Including MLflow DB Logging/Upload](screenshots/workflows/ci-run-steps-mlflow.png)
+
 Recommended deployment evidence screenshots for submission:
 
 - `screenshots/workflows/k8s-deployment-status.png` (pods/deployment running)
