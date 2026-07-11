@@ -1,3 +1,4 @@
+# Purpose: Generate evaluation visualizations for model performance.
 from pathlib import Path
 import glob
 import joblib

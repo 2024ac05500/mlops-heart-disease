@@ -1,3 +1,4 @@
+# Purpose: Run project diagnostics and environment checks.
 import joblib
 import numpy as np
 import pandas as pd

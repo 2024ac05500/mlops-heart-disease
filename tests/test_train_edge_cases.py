@@ -1,3 +1,4 @@
+# Purpose: Define automated tests for project functionality.
 import os
 
 import numpy as np

@@ -1,3 +1,4 @@
+# Purpose: Build the preprocessing transformer pipeline.
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder

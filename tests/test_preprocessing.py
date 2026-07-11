@@ -1,3 +1,4 @@
+# Purpose: Define automated tests for project functionality.
 import pandas as pd
 from src.data_preprocessing import preprocess
 

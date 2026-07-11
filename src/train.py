@@ -1,3 +1,4 @@
+# Purpose: Train, tune, evaluate, and persist ML models.
 import os
 import json
 from typing import Tuple

@@ -1,3 +1,4 @@
+# Purpose: Run model evaluation workflow and save summary results.
 from pathlib import Path
 import sys
 import os

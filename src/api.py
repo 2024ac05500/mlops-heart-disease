@@ -1,3 +1,4 @@
+# Purpose: Serve FastAPI prediction and monitoring endpoints.
 import logging
 import time
 from pathlib import Path

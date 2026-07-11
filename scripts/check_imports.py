@@ -1,3 +1,4 @@
+# Purpose: Validate required project imports and dependencies.
 import importlib
 import sys
 from pathlib import Path

@@ -1,3 +1,4 @@
+# Purpose: Define automated tests for project functionality.
 import sys
 from pathlib import Path
 

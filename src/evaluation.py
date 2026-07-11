@@ -1,3 +1,4 @@
+# Purpose: Evaluate trained models with classification metrics.
 from typing import Dict
 import numpy as np
 from sklearn.model_selection import cross_val_predict

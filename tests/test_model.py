@@ -1,3 +1,4 @@
+# Purpose: Define automated tests for project functionality.
 from sklearn.datasets import make_classification
 from src.train import train_model
 from src.predict import predict
