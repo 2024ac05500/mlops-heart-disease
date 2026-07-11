@@ -8,6 +8,7 @@ mlflow
 matplotlib
 seaborn
 pytest
+pytest-cov
 httpx2
 prometheus-client
 scipy

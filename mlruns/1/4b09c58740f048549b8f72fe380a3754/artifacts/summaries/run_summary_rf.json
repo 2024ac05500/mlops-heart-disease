@@ -1,0 +1,13 @@
+{
+  "model": "rf",
+  "scores": {
+    "accuracy": 0.92,
+    "precision": 0.9310344827586207,
+    "recall": 0.9310344827586207,
+    "f1": 0.9310344827586207,
+    "roc_auc": 0.9269293924466339
+  },
+  "tuned_params": {},
+  "model_artifact": "C:\\Users\\roope\\AppData\\Local\\Temp\\pytest-of-roope\\pytest-6\\test_train_and_predict0\\model_rf.joblib",
+  "pipeline_artifact": null
+}
