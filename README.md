@@ -283,4 +283,4 @@ CI run screenshots (source run URL):
 
 ## License
 
-This repository is provided as course/assignment material. Modify and reuse as needed.
+This repository is provided as course/assignment material. Modify and reuse as needed

@@ -61,20 +61,7 @@ The core workflow is:
 5. Deploy to Kubernetes using `k8s/` manifests
 6. Collect runtime metrics with Prometheus and visualize via Grafana
 
-```mermaid
-flowchart LR
-  A[Download dataset] --> B[Preprocess and split]
-  B --> C[Train and tune models]
-  C --> D[Log runs in MLflow]
-  C --> E[Save artifacts in models/]
-  E --> F[Serve with FastAPI]
-  F --> G[Expose /metrics]
-  G --> H[Prometheus scrape]
-  H --> I[Grafana dashboards]
-  F --> J[Docker image]
-  J --> K[Kubernetes deployment]
-  C --> L[CI smoke checks]
-```
+![Workflow Diagram (Mermaid)](screenshots/workflows/workflow-mermaid.png)
 
 ## 4. Exploratory Data Analysis (EDA)
 
@@ -252,6 +239,10 @@ Runtime proof captured:
 }
 ```
 
+Grafana healthcheck endpoint screenshot:
+
+![Grafana Healthcheck Endpoint](screenshots/workflows/grafana-healthcheck.png)
+
 - Grafana datasource API returned provisioned Prometheus datasource (uid `prometheus`, url `http://host.docker.internal:9090`, `isDefault: true`)
 - Grafana dashboard search API returned loaded dashboard:
   - `uid: heart-disease-api-monitoring`
@@ -424,6 +415,18 @@ Recommended deployment evidence screenshots for submission:
 - `screenshots/workflows/deployed-api-metrics-endpoint.png` (opened deployed `/metrics` endpoint)
 - `screenshots/workflows/deployed-api-predict-endpoint.png` (successful deployed `/predict` response)
 
+Kubernetes deployment status screenshot:
+
+![K8s Deployment Status](screenshots/workflows/k8s-deployment-status.png)
+
+Deployed API metrics endpoint screenshot:
+
+![Deployed API Metrics Endpoint](screenshots/workflows/deployed-api-metrics-endpoint.png)
+
+Deployed API predict endpoint screenshot:
+
+![Deployed API Predict Endpoint](screenshots/workflows/deployed-api-predict-endpoint.png)
+
 ## 9. Reproducibility and Environment
 
 ### 9.1 Dependency management
@@ -546,7 +549,3 @@ This repository demonstrates a complete MLOps workflow including:
 ## 15. Code Repository Link
 
 - Repository URL: https://github.com/2024ac05500/mlops-heart-disease
-
----
-
-_Report generated from the current repository state and implementation details._
