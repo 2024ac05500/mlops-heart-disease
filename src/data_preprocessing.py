@@ -5,7 +5,11 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from joblib import dump
 
-from .preprocessing_pipeline import build_preprocessing
+try:
+    from .preprocessing_pipeline import build_preprocessing
+except ImportError:
+    # Support direct script execution: `python src/data_preprocessing.py`.
+    from src.preprocessing_pipeline import build_preprocessing
 # joblib.dump already imported above
 
 # optional MLflow logging
@@ -27,10 +31,12 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df = df.replace("?", pd.NA)
 
-    # attempt to convert columns to numeric when possible
+    # Convert only fully numeric columns to avoid deprecated errors='ignore' usage.
     for col in df.columns:
         try:
-            df[col] = pd.to_numeric(df[col], errors="ignore")
+            converted = pd.to_numeric(df[col], errors="coerce")
+            if converted.notna().sum() == df[col].notna().sum():
+                df[col] = converted
         except Exception:
             pass
 

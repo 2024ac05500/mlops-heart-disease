@@ -199,7 +199,8 @@ def tune_model(model, X, y, param_grid=None, method="grid", n_iter=20, cv=3, sco
         return model, {}
 
     if method == "grid":
-        search = GridSearchCV(model, param_grid, cv=cv, scoring=scoring, n_jobs=-1)
+        # Use single-process tuning for stability on constrained CI/Windows hosts.
+        search = GridSearchCV(model, param_grid, cv=cv, scoring=scoring, n_jobs=1)
         search.fit(X, y)
         return search.best_estimator_, search.best_params_
 
@@ -211,7 +212,7 @@ def tune_model(model, X, y, param_grid=None, method="grid", n_iter=20, cv=3, sco
             cv=cv,
             scoring=scoring,
             random_state=random_state,
-            n_jobs=-1,
+            n_jobs=1,
         )
         search.fit(X, y)
         return search.best_estimator_, search.best_params_
