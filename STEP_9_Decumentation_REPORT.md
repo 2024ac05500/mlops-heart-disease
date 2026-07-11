@@ -351,10 +351,15 @@ It performs:
 - dependency installation from `requirements.txt`
 - linting with `flake8` (`--max-line-length=120`)
 - unit tests via `pytest`
+- coverage enforcement via `pytest --cov=src --cov-fail-under=70`
 - quick smoke training run using synthetic data
+- MLflow DB logging during smoke run using `MLFLOW_TRACKING_URI=sqlite:///${{ github.workspace }}/mlflow_ci.db`
+- MLflow DB validation using `MlflowClient.search_experiments()` and run count checks
 - artifact upload of the `models/` directory
+- artifact upload of MLflow tracking store (`mlflow_ci.db` and `mlruns/`)
 
 This pipeline validates both code style and core training functionality.
+It also preserves CI experiment-tracking evidence as downloadable MLflow database artifacts.
 
 ### 8.2 Testing and linting
 

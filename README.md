@@ -253,6 +253,12 @@ After startup, open `http://127.0.0.1:3000` and the Prometheus datasource plus d
 ## CI
 
 - GitHub Actions workflow is in `.github/workflows/ci.yml`: installs deps, runs lint, executes tests, and uploads `models/` as an artifact.
+- CI also logs smoke-training runs to an MLflow SQLite database via:
+  - `MLFLOW_TRACKING_URI=sqlite:///${{ github.workspace }}/mlflow_ci.db`
+- CI validates that experiments/runs are present in the MLflow DB using `MlflowClient`.
+- CI uploads MLflow tracking artifacts as `mlflow-tracking-db`:
+  - `mlflow_ci.db`
+  - `mlruns/`
 - Coverage is enforced in CI with `pytest --cov=src --cov-fail-under=70`.
 - Coverage artifacts are uploaded as `coverage-report` containing:
   - `coverage.xml`

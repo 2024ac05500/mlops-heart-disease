@@ -41,9 +41,27 @@ jobs:
           path: |
             coverage.xml
             htmlcov/
-      - name: Quick train smoke (CI)
+      - name: Quick train smoke + MLflow DB logging (CI)
+        env:
+          MLFLOW_TRACKING_URI: sqlite:///${{ github.workspace }}/mlflow_ci.db
+          MLFLOW_ARTIFACT_URI: ${{ github.workspace }}/mlruns
         run: |
           python -c "from src.train import train_and_log; from sklearn.datasets import make_classification; X,y=make_classification(n_samples=100,n_features=10,random_state=0); train_and_log(X,y,out_dir='models',quick=True)"
+
+      - name: Validate MLflow DB entries (CI)
+        env:
+          MLFLOW_TRACKING_URI: sqlite:///${{ github.workspace }}/mlflow_ci.db
+        run: |
+          python -c "from mlflow.tracking import MlflowClient; c=MlflowClient(); exps=c.search_experiments(); print('experiments', [(e.experiment_id, e.name) for e in exps]); runs=c.search_runs([e.experiment_id for e in exps], max_results=20); print('run_count', len(runs))"
+
+      - name: Upload MLflow tracking DB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-tracking-db
+          path: |
+            mlflow_ci.db
+            mlruns/
+
       - name: Upload models artifact
         uses: actions/upload-artifact@v4
         with:
