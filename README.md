@@ -253,6 +253,15 @@ After startup, open `http://127.0.0.1:3000` and the Prometheus datasource plus d
 ## CI
 
 - GitHub Actions workflow is in `.github/workflows/ci.yml`: installs deps, runs lint, executes tests, and uploads `models/` as an artifact.
+- Coverage is enforced in CI with `pytest --cov=src --cov-fail-under=70`.
+- Coverage artifacts are uploaded as `coverage-report` containing:
+  - `coverage.xml`
+  - `htmlcov/` HTML report
+- Latest local validation proof:
+  - command: `.venv\Scripts\python.exe -m pytest -q --cov=src --cov-report=term-missing --cov-report=xml`
+  - result: `19 passed`
+  - measured total coverage: `79%`
+  - status against CI gate: `PASS` (79% >= 70%)
 
 ## Repository Link
 

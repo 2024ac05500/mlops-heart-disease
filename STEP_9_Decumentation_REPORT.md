@@ -362,7 +362,37 @@ This pipeline validates both code style and core training functionality.
 - `flake8` enforces style constraints and catches syntax issues
 - Unit-test proof: `tests/test_preprocessing.py` covers data preprocessing behavior and `tests/test_model.py` covers model training/prediction behavior.
 
-### 8.3 CI/CD and deployment workflow screenshots
+### 8.3 Code coverage proof
+
+- Coverage is integrated in CI via `pytest --cov=src --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=70`.
+- Coverage threshold is enforced at `70%` in `.github/workflows/ci.yml`.
+- Coverage artifacts are uploaded in CI as `coverage-report`:
+  - `coverage.xml`
+  - `htmlcov/`
+
+Latest executed local proof command:
+
+```bash
+.venv\Scripts\python.exe -m pytest -q --cov=src --cov-report=term-missing --cov-report=xml
+```
+
+Observed proof output summary:
+
+- tests: `19 passed`
+- total coverage: `79%`
+- gate check: `PASS` because `79% >= 70%`
+
+Module-level coverage snapshot from the run:
+
+- `src/api.py`: 87%
+- `src/data_preprocessing.py`: 76%
+- `src/evaluation.py`: 85%
+- `src/predict.py`: 89%
+- `src/preprocessing_pipeline.py`: 100%
+- `src/train.py`: 73%
+- `src/utils.py`: 100%
+
+### 8.4 CI/CD and deployment workflow screenshots
 
 - Add CI workflow run screenshots under `screenshots/workflows/` (for example, lint/test/smoke stages from GitHub Actions).
 - Add deployment workflow screenshots under `screenshots/workflows/` (for example, Docker build, Kubernetes apply, service exposure).
