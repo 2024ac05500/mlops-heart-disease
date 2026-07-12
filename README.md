@@ -197,7 +197,7 @@ Follow this ordered walkthrough to understand how the code executes end to end.
      - dashboard definition for request rate, latency, and error monitoring
 
 7. Continuous integration
-   - `.github/workflows/ci.yml`
+   - `.github/workflows/cicd.yml`
      - installs dependencies
      - runs flake8 linting and pytest tests
      - performs a quick smoke training run
@@ -252,7 +252,7 @@ After startup, open `http://127.0.0.1:3000` and the Prometheus datasource plus d
 
 ## CI
 
-- GitHub Actions workflow is in `.github/workflows/ci.yml`: installs deps, runs lint, executes tests, and uploads `models/` as an artifact.
+- GitHub Actions workflow is in `.github/workflows/cicd.yml`: installs deps, runs lint, executes tests, and uploads `models/` as an artifact.
 - CI also logs smoke-training runs to an MLflow SQLite database via:
   - `MLFLOW_TRACKING_URI=sqlite:///${{ github.workspace }}/mlflow_ci.db`
 - CI validates that experiments/runs are present in the MLflow DB using `MlflowClient`.
@@ -284,3 +284,5 @@ CI run screenshots (source run URL):
 ## License
 
 This repository is provided as course/assignment material. Modify and reuse as needed
+
+

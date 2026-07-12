@@ -48,7 +48,7 @@ The pipeline processes these features and trains a classifier capable of binary 
 - `k8s/deployment.yaml` / `k8s/service.yaml` - Kubernetes deployment and service manifests
 - `monitoring/prometheus.yml` - Prometheus scrape configuration
 - `monitoring/grafana/dashboard.json` - Grafana dashboard definition
-- `.github/workflows/ci.yml` - CI pipeline
+- `.github/workflows/cicd.yml` - CI pipeline
 
 ### 3.2 Workflow Diagram
 
@@ -334,7 +334,7 @@ Expected verification evidence:
 
 ### 8.1 GitHub Actions
 
-The CI workflow is defined in `.github/workflows/ci.yml`.
+The CI workflow is defined in `.github/workflows/cicd.yml`.
 It performs:
 
 - code checkout
@@ -361,7 +361,7 @@ It also preserves CI experiment-tracking evidence as downloadable MLflow databas
 ### 8.3 Code coverage proof
 
 - Coverage is integrated in CI via `pytest --cov=src --cov-report=term-missing --cov-report=xml --cov-report=html --cov-fail-under=70`.
-- Coverage threshold is enforced at `70%` in `.github/workflows/ci.yml`.
+- Coverage threshold is enforced at `70%` in `.github/workflows/cicd.yml`.
 - Coverage artifacts are uploaded in CI as `coverage-report`:
   - `coverage.xml`
   - `htmlcov/`
@@ -530,7 +530,7 @@ This repository demonstrates a complete MLOps workflow including:
 - `k8s/service.yaml`
 - `monitoring/prometheus.yml`
 - `monitoring/grafana/dashboard.json`
-- `.github/workflows/ci.yml`
+- `.github/workflows/cicd.yml`
 - `src/api.py`
 - `src/train.py`
 - `src/data_preprocessing.py`
@@ -540,7 +540,7 @@ This repository demonstrates a complete MLOps workflow including:
 
 ## 14. Available Artifacts
 
-- CI workflow: `.github/workflows/ci.yml`
+- CI workflow: `.github/workflows/cicd.yml`
 - Docker image packaging: `Dockerfile`
 - Kubernetes manifests: `k8s/deployment.yaml`, `k8s/service.yaml`
 - Monitoring files: `monitoring/prometheus.yml`, `monitoring/grafana/dashboard.json`
@@ -549,3 +549,5 @@ This repository demonstrates a complete MLOps workflow including:
 ## 15. Code Repository Link
 
 - Repository URL: https://github.com/2024ac05500/mlops-heart-disease
+
+
