@@ -1,4 +1,4 @@
-name: CI-CD
+name: CI
 
 on:
   push:
@@ -6,34 +6,25 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-
 jobs:
   test:
-    name: Test and Validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-
       - name: Set PYTHONPATH for tests
         run: |
           echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
-
       - name: Lint
         run: |
           python -m pip install flake8
           flake8 --max-line-length=120
-
       - name: Run tests with coverage
         run: |
           pytest -q \
@@ -50,7 +41,6 @@ jobs:
           path: |
             coverage.xml
             htmlcov/
-
       - name: Quick train smoke + MLflow DB logging (CI)
         env:
           MLFLOW_TRACKING_URI: sqlite:///${{ github.workspace }}/mlflow_ci.db
@@ -77,62 +67,3 @@ jobs:
         with:
           name: models
           path: models/
-
-  deploy:
-    name: Build and Deploy
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    env:
-      IMAGE_REPO: ghcr.io/${{ github.repository_owner }}/heart-disease-api
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set image tag metadata
-        id: meta
-        run: |
-          echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "image=${IMAGE_REPO}:${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Docker image
-        run: |
-          docker build \
-            -t "${IMAGE_REPO}:${{ steps.meta.outputs.tag }}" \
-            -t "${IMAGE_REPO}:latest" \
-            .
-
-      - name: Push Docker image
-        run: |
-          docker push "${IMAGE_REPO}:${{ steps.meta.outputs.tag }}"
-          docker push "${IMAGE_REPO}:latest"
-
-      - name: Render deployment manifest for this image
-        run: |
-          sed "s|image: heart-disease-api:latest|image: ${IMAGE_REPO}:${{ steps.meta.outputs.tag }}|" k8s/deployment.yaml > k8s/deployment.cicd.yaml
-
-      - name: Upload rendered deployment manifest
-        uses: actions/upload-artifact@v4
-        with:
-          name: deployment-manifest
-          path: k8s/deployment.cicd.yaml
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: v1.30.0
-
-      - name: Validate Kubernetes manifests (deploy dry-run)
-        run: |
-          kubectl apply --dry-run=client -f k8s/service.yaml
-          kubectl apply --dry-run=client -f k8s/deployment.cicd.yaml
-          echo "Deploy manifest validation completed."
