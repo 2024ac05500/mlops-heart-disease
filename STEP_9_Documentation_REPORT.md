@@ -549,4 +549,7 @@ This repository demonstrates a complete MLOps workflow including:
 ## 15. Code Repository Link
 
 - Repository URL: https://github.com/2024ac05500/mlops-heart-disease
+
+## 16. YouTube Link
+
 - YouTube Video URL : https://youtu.be/FcXxGVCWVWI
